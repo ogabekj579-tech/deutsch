@@ -26,7 +26,7 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
       overflow-y: auto;
       transition: background 1s ease;
@@ -162,7 +162,7 @@
     </div>
     <div id="quiz" style="display:none">
       <div id="questionContainer"></div>
-      <button id="nextBtn" onclick="nextQuestion()">Nächste Frage</button>
+      <button id="nextBtn" onclick="nextQuestion()" style="display:none">Nächste Frage</button>
     </div>
     <div id="result" style="display:none"></div>
   </div>
@@ -221,6 +221,7 @@
       const container = document.getElementById('questionContainer');
       container.innerHTML = `<div class='question'><b>${current + 1}. ${q.question}</b></div>` +
         q.options.map((opt, i) => `<div class='option' onclick='selectOption(${i}, this)'>${opt}</div>`).join('');
+      document.getElementById('nextBtn').style.display = 'none';
     }
 
     function selectOption(i, element) {
@@ -234,16 +235,16 @@
         element.classList.add('wrong');
         document.querySelectorAll('.option')[q.correct].classList.add('correct');
       }
-      setTimeout(() => nextQuestion(), 1000);
+      if (current < questions.length - 1) {
+        document.getElementById('nextBtn').style.display = 'inline-block';
+      } else {
+        setTimeout(() => showResult(), 1500);
+      }
     }
 
     function nextQuestion() {
       current++;
-      if (current < questions.length) {
-        showQuestion();
-      } else {
-        showResult();
-      }
+      showQuestion();
     }
 
     function showResult() {
@@ -263,11 +264,13 @@
       table += `<button onclick='startNewTest()'>🔁 Neuer Test</button>`;
       resultDiv.innerHTML = table;
       resultDiv.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function startNewTest() {
       document.getElementById('result').style.display = 'none';
       document.getElementById('start').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function downloadScreenshot() {
