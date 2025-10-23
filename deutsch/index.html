@@ -5,12 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deutsch KI-Test</title>
   <style>
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(270deg, #007aff, #00b4db, #43cea2, #185a9d);
@@ -26,6 +20,12 @@
       overflow-y: auto;
     }
 
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     .container {
       background: rgba(255, 255, 255, 0.15);
       border-radius: 25px;
@@ -37,6 +37,11 @@
       backdrop-filter: blur(25px);
       margin: 20px;
       animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     h1 {
@@ -119,17 +124,14 @@
     let score = 0;
     let userAnswers = [];
 
-    function randomWord(level) {
-      const words = {
-        A1: ['Haus', 'Hund', 'Katze', 'Auto', 'Apfel', 'Tisch', 'Fenster'],
-        A2: ['Freundschaft', 'Frühstück', 'Familie', 'Schule', 'Kleider'],
-        B1: ['Gesundheit', 'Reise', 'Arbeit', 'Sprache', 'Natur'],
-        B2: ['Umwelt', 'Technologie', 'Kultur', 'Politik', 'Gesellschaft'],
-        C1: ['Wirtschaft', 'Philosophie', 'Literatur', 'Wissenschaft', 'Kommunikation'],
-        C2: ['Existenz', 'Bewusstsein', 'Intuition', 'Erkenntnis', 'Ästhetik']
-      };
-      return words[level][Math.floor(Math.random() * words[level].length)];
-    }
+    const wordBank = {
+      A1: ['Haus', 'Hund', 'Katze', 'Auto', 'Apfel', 'Tisch', 'Fenster', 'Baum', 'Stuhl', 'Buch', 'Lampe', 'Uhr', 'Tasse', 'Brot', 'Vogel', 'Blume', 'Wasser', 'Milch', 'Kind', 'Mutter', 'Vater', 'Freund', 'Tag', 'Nacht', 'Tür'],
+      A2: ['Freundschaft', 'Frühstück', 'Familie', 'Schule', 'Kleider', 'Lehrer', 'Kino', 'Arzt', 'Zug', 'Flugzeug', 'Straße', 'Laden', 'Fensterbank', 'Zimmer', 'Bett'],
+      B1: ['Gesundheit', 'Reise', 'Arbeit', 'Sprache', 'Natur', 'Film', 'Musik', 'Sport', 'Technik', 'Universität'],
+      B2: ['Umwelt', 'Technologie', 'Kultur', 'Politik', 'Gesellschaft', 'Diskussion', 'Meinung', 'Forschung', 'Projekt', 'Kommunikation'],
+      C1: ['Wirtschaft', 'Philosophie', 'Literatur', 'Wissenschaft', 'Kommunikation', 'Analyse', 'Argumentation', 'Struktur', 'Beziehung', 'Theorie'],
+      C2: ['Existenz', 'Bewusstsein', 'Intuition', 'Erkenntnis', 'Ästhetik', 'Abstraktion', 'Interpretation', 'Subjektivität', 'Objektivität', 'Kausalität']
+    };
 
     function generateQuestions(level) {
       const templates = [
@@ -148,18 +150,19 @@
         ['heiß', 'kalt', 'langsam', 'schnell']
       ];
 
-      const set = new Set();
-      while (set.size < 20) {
-        const word = randomWord(level);
+      let availableWords = [...wordBank[level]];
+      availableWords = availableWords.sort(() => Math.random() - 0.5).slice(0, 20);
+
+      const qs = availableWords.map(word => {
         const templateIndex = Math.floor(Math.random() * templates.length);
-        const q = {
+        return {
           question: templates[templateIndex](word),
           options: optionsBase[templateIndex],
           correct: Math.floor(Math.random() * 4)
         };
-        set.add(JSON.stringify(q));
-      }
-      return Array.from(set).map(q => JSON.parse(q));
+      });
+
+      return qs;
     }
 
     function startTest() {
