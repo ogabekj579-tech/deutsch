@@ -1,356 +1,283 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Deutsch KI-Test — Немis tili testi</title>
-  <meta name="description" content="Генератор тестов по немецкому: вопросы генерируются динамически, интерфейс на узбекском/немецком, мобильная адаптация и скриншот результата"> 
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch KI-Test</title>
   <style>
-    /* ---- Root / variables ---- */
-    :root{
-      --fg:#0b1220; --card:#0f1724; --glass: rgba(255,255,255,0.06);
-      --accent1:#06b6d4; --accent2:#7c3aed; --accent3:#fb7185; --ok:#22c55e; --bad:#ef4444;
-      --text:#eef2ff; --muted:rgba(238,242,255,0.7);
-      --radius:14px;
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
-    /* ---- Base ---- */
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-      color:var(--text);display:flex;align-items:center;justify-content:center;padding:20px;background:#081226;overflow-y:auto;
-      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-      background: radial-gradient(1000px 400px at 10% 10%, rgba(124,58,237,0.08), transparent),
-                  radial-gradient(800px 300px at 90% 90%, rgba(6,182,212,0.06), transparent);
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* animated gradient background container for mobile-friendly look */
-    .bg-anim{
-      position:fixed;inset:0;z-index:-1;overflow:hidden;
-      background:linear-gradient(120deg,#0f1724 0%, #051025 35%, #06183a 100%);
-    }
-    .bg-anim::before{content:'';position:absolute;inset:-40%;background:linear-gradient(60deg, rgba(59,130,246,0.12), rgba(124,58,237,0.12), rgba(239,68,68,0.08));filter:blur(60px);animation:move 18s linear infinite}
-    @keyframes move{0%{transform:translate(-10%, -10%) rotate(0deg)}50%{transform:translate(10%,10%) rotate(15deg)}100%{transform:translate(-10%,-10%) rotate(0deg)}}
-
-    /* ---- Card ---- */
-    .wrap{max-width:920px;width:100%;border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 10px 40px rgba(2,6,23,0.6)}
-    header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
-    h1{font-size:18px;margin:0;background:linear-gradient(90deg,var(--accent1),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-
-    .controls{display:flex;gap:8px;align-items:center}
-    select,input[type=button],button{appearance:none;border:0;background:var(--glass);color:var(--text);padding:8px 12px;border-radius:10px;font-weight:600}
-    button.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#04203a;border:none;box-shadow:0 6px 18px rgba(11,24,46,0.6)}
-    .lang-switch{display:flex;gap:6px;align-items:center}
-
-    main{display:grid;grid-template-columns:1fr 360px;gap:14px}
-    .panel{background:rgba(255,255,255,0.02);padding:14px;border-radius:var(--radius)}
-
-    /* quiz area */
-    .qhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-    .qnum{color:var(--muted);font-size:13px}
-    .qtext{font-size:18px;font-weight:600;margin:10px 0}
-
-    .answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .answer{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);cursor:pointer;border:1px solid rgba(255,255,255,0.03);font-weight:600}
-    .answer:hover{transform:translateY(-3px)}
-    .answer.selected{box-shadow:0 8px 20px rgba(124,58,237,0.14);border-color:rgba(124,58,237,0.9)}
-    .controls-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
-
-    /* result area */
-    .result-wrap{position:sticky;top:18px}
-    .result-title{font-size:16px;margin:0 0 8px 0}
-    table{width:100%;border-collapse:collapse;margin-top:8px}
-    th,td{border:1px solid rgba(255,255,255,0.04);padding:8px;text-align:center;font-size:14px}
-
-    .btn-screenshot{display:inline-block;margin-top:10px;padding:10px 12px;border-radius:10px;background:linear-gradient(90deg,var(--accent3),var(--accent2));font-weight:700;border:none}
-
-    /* responsive/mobile styles */
-    @media (max-width:900px){
-      main{grid-template-columns:1fr;}
-      .result-wrap{position:static}
-      .answers{grid-template-columns:1fr}
-      .panel{padding:12px}
-      .wrap{padding:14px}
-      h1{font-size:16px}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(270deg, #007aff, #00b4db, #43cea2, #185a9d);
+      background-size: 600% 600%;
+      animation: gradientMove 10s ease infinite;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      overflow-y: auto;
+      transition: background 1s ease;
     }
 
-    /* mobile - bigger touch targets */
-    @media (max-width:480px){
-      .answer{padding:14px;font-size:16px}
-      button,select{padding:12px 14px}
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 25px;
+      padding: 30px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      backdrop-filter: blur(25px);
+      margin: 20px;
+      animation: fadeIn 0.8s ease forwards;
+      transition: transform 0.4s ease;
     }
 
+    .container:hover {
+      transform: scale(1.02);
+    }
+
+    button {
+      background: linear-gradient(135deg, #ffcc00, #ff9500);
+      border: none;
+      padding: 14px 26px;
+      border-radius: 18px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 17px;
+      color: #222;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #ffd84d, #ffac33);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 204, 0, 0.4);
+    }
+
+    .question {
+      margin: 20px 0;
+      text-align: left;
+      font-size: 18px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .option {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 8px 0;
+      cursor: pointer;
+      transition: 0.25s;
+      font-size: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .option:hover {
+      background: rgba(255, 255, 255, 0.5);
+      transform: scale(1.03);
+    }
+
+    .selected {
+      background: linear-gradient(135deg, #34c759, #30d158);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(52,199,89,0.5);
+    }
+
+    .correct {
+      background: linear-gradient(135deg, #34c759, #30d158);
+      color: #fff;
+    }
+
+    .wrong {
+      background: linear-gradient(135deg, #ff3b30, #ff453a);
+      color: #fff;
+    }
+
+    #resultTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    #resultTable td, #resultTable th {
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    #resultTable th {
+      background: rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 30px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 15px rgba(255,255,255,0.7);
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
-  <div class="bg-anim" aria-hidden="true"></div>
-
-  <div class="wrap" role="application">
-    <header>
-      <h1>Deutsch KI-Test — Немis tili testi</h1>
-      <div class="controls">
-        <div class="lang-switch">
-          <select id="langSelect" aria-label="Til tanlash">
-            <option value="uz">🇺🇿 Oʻzbekcha</option>
-            <option value="de">🇩🇪 Deutsch</option>
-          </select>
-        </div>
-        <label style="display:flex;align-items:center;gap:8px">
-          <span id="lvlLabel">Daraja / Niveau</span>
-          <select id="levelSelect">
-            <option value="A1">A1</option>
-            <option value="A2">A2</option>
-            <option value="B1">B1</option>
-            <option value="B2">B2</option>
-            <option value="C1">C1</option>
-            <option value="C2">C2</option>
-          </select>
-        </label>
-        <button id="startBtn" class="primary">Testni boshlash / Test starten</button>
-      </div>
-    </header>
-
-    <main>
-      <section class="panel" id="quizPanel">
-        <div class="qhead">
-          <div class="qnum" id="qnum">— / 20</div>
-          <div class="small" id="progress">0 ta javob / Antworten: 0</div>
-        </div>
-
-        <div class="qtext" id="qtext">Boshlash uchun "Testni boshlash" tugmasini bosing. / Klicke "Test starten".</div>
-
-        <div class="answers" id="answers"></div>
-
-        <div class="controls-row">
-          <div class="small" id="hintText">Savollar doimo nemis tilida bo'ladi. / Fragen sind auf Deutsch.</div>
-          <div>
-            <button id="prevBtn">Orqaga / Zurück</button>
-            <button id="nextBtn" style="margin-left:8px">Keyingi / Nächste</button>
-            <button id="finishBtn" style="margin-left:8px">Tugatish / Beenden</button>
-          </div>
-        </div>
-      </section>
-
-      <aside class="panel result-wrap" id="resultPanel">
-        <h3 class="result-title" id="resultTitle">Natija / Ergebnis</h3>
-        <div id="resultSummary">Hozircha natija yo'q. / Noch keine Ergebnisse.</div>
-        <div id="resultTableWrap" style="margin-top:8px"></div>
-      </aside>
-    </main>
+  <div class="container" id="app">
+    <h1>Deutsch KI-Test</h1>
+    <div id="start">
+      <p>Wähle dein Niveau:</p>
+      <select id="level">
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="B1">B1</option>
+        <option value="B2">B2</option>
+        <option value="C1">C1</option>
+        <option value="C2">C2</option>
+      </select><br>
+      <button onclick="startTest()">Test starten</button>
+    </div>
+    <div id="quiz" style="display:none">
+      <div id="questionContainer"></div>
+      <button id="nextBtn" onclick="nextQuestion()">Nächste Frage</button>
+    </div>
+    <div id="result" style="display:none"></div>
   </div>
 
   <script>
-    // UI text for uz and de
-    const UI = {
-      uz: {
-        start: 'Testni boshlash', next: 'Keyingi', prev: 'Orqaga', finish: 'Tugatish', takeScreenshot: '📸 Skachat qilish',
-        hint: "Savollar doimo nemis tilida bo'ladi.", resultTitle: 'Natija', noResult: "Hozircha natija yo'q.",
-        commentPoor: 'Sizga ko‘proq mashq kerak!', commentOk: 'Yaxshi! Yo‘lda ketayapsiz!', commentGreat: 'Ajoyib! Sizning nemis tilingiz zo‘r!'
-      },
-      de: {
-        start: 'Test starten', next: 'Nächste', prev: 'Zurück', finish: 'Beenden', takeScreenshot: '📸 Screenshot speichern',
-        hint: 'Fragen sind auf Deutsch.', resultTitle: 'Ergebnis', noResult: 'Noch keine Ergebnisse.',
-        commentPoor: 'Du musst noch viel üben!', commentOk: 'Gut gemacht! Du bist auf dem richtigen Weg!', commentGreat: 'Ausgezeichnet! Dein Deutsch ist hervorragend!'
-      }
-    };
-
-    // Word pools and templates to generate questions dynamically (no repeats)
-    const pools = {
-      A1: {words:['Haus','Hund','Katze','Buch','Auto','Kind','Tisch','Stuhl','Apfel','Wasser','Milch','Brot','Lehrer','Schule','Stadt','Tür','Fenster','Tag','Mann','Frau'], verbs:['sein','haben','gehen','kommen','machen','essen','trinken','sehen','sprechen','wohnen']},
-      A2: {words:['Zeit','Arbeit','Freund','Familie','Zimmer','Straße','Name','Adresse','Einkauf','Garten','Reise','Frühstück','Kleider','Sommer','Winter'], verbs:['brauchen','kaufen','suchen','finden','lernen','arbeiten','wohnen']},
-      B1: {words:['Erfahrung','Möglichkeit','Entwicklung','Gesellschaft','Politik','Technik','Hilfe','Ergebnis'], verbs:['entwickeln','erklären','verbessern','bedeuten']},
-      B2: {words:['Herausforderung','Verantwortung','Zufriedenheit','Bedeutung','Analyse','Forschung'], verbs:['bewältigen','erfordern','beeinflussen']},
-      C1: {words:['Konsequenz','Diversifikation','Hypothese','Paradigma','Synthese','Prognose'], verbs:['implizieren','evaluieren','konsolidieren']},
-      C2: {words:['Präambel','Epistemologie','Hermeneutik','Ambiguität','Teleologie','Kontingenz'], verbs:['dekonstruktivieren','reziprozieren']}
-    };
-
-    // helpers
-    const $ = sel => document.querySelector(sel);
-    const randInt = n => Math.floor(Math.random()*n);
-    const sample = arr => arr[randInt(arr.length)];
-    const shuffle = arr => {for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr};
-
-    // Create a question object in German. Many templates to vary.
-    function createQuestion(level){
-      const lvl = pools[level] || pools.A1;
-      const t = Math.random();
-
-      // A1: article / translate
-      if(level==='A1' && t < 0.5){
-        const noun = sample(lvl.words);
-        const correct = sample(['der','die','das']);
-        const wrongs = shuffle(['der','die','das'].filter(x=>x!==correct)).slice(0,2);
-        const extras = ['ein','eine'];
-        const choices = shuffle([correct, ...wrongs, sample(extras)]);
-        return {text:`Welcher Artikel passt zu „${noun}“?`, choices, correctIndex: choices.indexOf(correct)};
-      }
-
-      // A1-A2: translate simple noun to Uzbek (limited map) — user sees German prompt
-      if((level==='A1' || level==='A2') && t < 0.9){
-        const word = sample(lvl.words);
-        const translations = {'Haus':'uy','Hund':'it','Katze':'mushuk','Buch':'kitob','Auto':'mashina','Kind':'bola','Tisch':'stol','Stuhl':'stul','Apfel':'olma','Wasser':'suv','Milch':'sut','Brot':'non','Lehrer':'o‘qituvchi','Schule':'maktab','Stadt':'shahar','Zeit':'vaqt','Arbeit':'ish','Freund':'do‘st','Familie':'oila','Zimmer':'xona'};
-        const correct = translations[word] || 'taʼrif';
-        const pool = Object.values(translations);
-        const wrongs = [];
-        while(wrongs.length<3){const w=sample(pool); if(!wrongs.includes(w) && w!==correct) wrongs.push(w);} 
-        const choices = shuffle([correct,...wrongs]);
-        return {text:`Übersetze ins Uzbekisch: „${word}“`, choices, correctIndex: choices.indexOf(correct)};
-      }
-
-      // B1-B2: choose correct conjugation of verb (Präsens)
-      if((level==='B1' || level==='B2') && t < 0.6){
-        const subjects = ['ich','du','er','sie','wir','ihr'];
-        const v = sample(Object.values(pools).flatMap(x=>x.verbs));
-        const subj = sample(subjects);
-        const conj = conjugatePresent(v, subj);
-        const wrongs = [];
-        while(wrongs.length<3){const w=conjugatePresent(sample(Object.values(pools).flatMap(x=>x.verbs)), subj); if(!wrongs.includes(w) && w!==conj) wrongs.push(w);} 
-        const choices = shuffle([conj,...wrongs]);
-        return {text:`Wähle die richtige Form: „${subj} ${v}“ (Präsens)`, choices, correctIndex: choices.indexOf(conj)};
-      }
-
-      // Higher levels: synonym/closest meaning (German words)
-      const word = sample(Object.values(pools).flatMap(x=>x.words));
-      const pool = Object.values(pools).flatMap(x=>x.words);
-      const wrongs = [];
-      while(wrongs.length<3){const w=sample(pool); if(!wrongs.includes(w) && w!==word) wrongs.push(w);} 
-      const choices = shuffle([word,...wrongs]);
-      return {text:`Wähle das Wort, das der Bedeutung von „${word}“ am nächsten kommt.`, choices, correctIndex: choices.indexOf(word)};
-    }
-
-    function conjugatePresent(inf, subj){
-      let stem = inf.replace(/(en|n)$/,'');
-      switch(subj){case 'ich': return stem+'e'; case 'du': return stem+'st'; case 'er': case 'sie': return stem+'t'; case 'wir': return inf; case 'ihr': return stem+'t'; default: return inf}
-    }
-
-    // Generate 20 unique questions using templates above
-    function generateTest(level){
-      const used = new Set();
-      const qs = [];
-      let attempts = 0;
-      while(qs.length < 20 && attempts < 500){
-        const q = createQuestion(level);
-        attempts++;
-        // ensure uniqueness by question text and choices combined
-        const key = q.text + '|' + q.choices.join('|');
-        if(!used.has(key)){
-          used.add(key);
-          qs.push(q);
-        }
-      }
-      // Fallback: if not enough unique, fill with simple generated placeholders
-      while(qs.length < 20){
-        const filler = {text:`Simple Frage ${qs.length+1}`, choices:['A','B','C','D'], correctIndex:randInt(4)}; qs.push(filler);
-      }
-      return qs;
-    }
-
-    // UI state
-    let lang = 'uz';
     let questions = [];
-    let idx = 0;
-    let answers = Array(20).fill(null);
+    let current = 0;
+    let score = 0;
+    let userAnswers = [];
 
-    // elements
-    const langSelect = $('#langSelect');
-    const startBtn = $('#startBtn');
-    const levelSelect = $('#levelSelect');
-    const qnumEl = $('#qnum');
-    const qtextEl = $('#qtext');
-    const answersEl = $('#answers');
-    const progressEl = $('#progress');
-    const resultPanel = $('#resultPanel');
-    const resultSummary = $('#resultSummary');
-    const resultTableWrap = $('#resultTableWrap');
-    const prevBtn = $('#prevBtn');
-    const nextBtn = $('#nextBtn');
-    const finishBtn = $('#finishBtn');
-    const startLabel = $('#lvlLabel');
-
-    // Language switch
-    langSelect.addEventListener('change', ()=>{lang = langSelect.value; applyLang();});
-    function applyLang(){
-      const u = UI[lang];
-      startBtn.textContent = `${u.start} / ${UI[lang==='uz'?'de':'uz'].start}`;
-      nextBtn.textContent = `${u.next} / ${UI[lang==='uz'?'de':'uz'].next}`;
-      prevBtn.textContent = `${u.prev} / ${UI[lang==='uz'?'de':'uz'].prev}`;
-      finishBtn.textContent = `${u.finish} / ${UI[lang==='uz'?'de':'uz'].finish}`;
-      $('#hintText').textContent = `${u.hint} / ${UI[lang==='uz'?'de':'uz'].hint}`;
-      $('#resultTitle').textContent = `${u.resultTitle} / ${UI[lang==='uz'?'de':'uz'].resultTitle}`;
-      resultSummary.textContent = u.noResult + ' / ' + UI[lang==='uz'?'de':'uz'].noResult;
-      startLabel.textContent = lang==='uz' ? 'Daraja' : 'Niveau';
+    function randomWord(level) {
+      const words = {
+        A1: ['Haus', 'Hund', 'Katze', 'Buch', 'Auto'],
+        A2: ['Freundschaft', 'Frühstück', 'Schule', 'Kleider', 'Familie'],
+        B1: ['Gesundheit', 'Reise', 'Arbeit', 'Sprache', 'Natur'],
+        B2: ['Umwelt', 'Technologie', 'Kultur', 'Politik', 'Gesellschaft'],
+        C1: ['Wirtschaft', 'Philosophie', 'Literatur', 'Wissenschaft', 'Kommunikation'],
+        C2: ['Existenz', 'Bewusstsein', 'Intuition', 'Erkenntnis', 'Ästhetik']
+      };
+      return words[level][Math.floor(Math.random() * words[level].length)];
     }
 
-    applyLang();
+    function generateQuestions(level) {
+      let set = new Set();
+      while (set.size < 20) {
+        let word = randomWord(level);
+        let q = {
+          question: `Was bedeutet das Wort „${word}“?`,
+          options: [
+            `Das ist ein Tier.`,
+            `Das ist ein Gegenstand.`,
+            `Das ist ein Konzept.`,
+            `Das ist eine Handlung.`
+          ],
+          correct: Math.floor(Math.random() * 4)
+        };
+        set.add(JSON.stringify(q));
+      }
+      return Array.from(set).map(q => JSON.parse(q));
+    }
 
-    // Start new test
-    startBtn.addEventListener('click', ()=>{
-      questions = generateTest(levelSelect.value);
-      idx = 0; answers = Array(questions.length).fill(null);
-      renderQuestion();
-      resultSummary.textContent = '';
-      resultTableWrap.innerHTML = '';
-    });
+    function startTest() {
+      const level = document.getElementById('level').value;
+      questions = generateQuestions(level);
+      current = 0;
+      score = 0;
+      userAnswers = [];
+      document.getElementById('start').style.display = 'none';
+      document.getElementById('quiz').style.display = 'block';
+      document.getElementById('result').style.display = 'none';
+      showQuestion();
+    }
 
-    function renderQuestion(){
-      const q = questions[idx];
-      qnumEl.textContent = `${idx+1} / ${questions.length}`;
-      qtextEl.textContent = q.text;
-      answersEl.innerHTML = '';
-      q.choices.forEach((c,i)=>{
-        const div = document.createElement('div'); div.className = 'answer'; div.innerHTML = `<strong>${String.fromCharCode(65+i)}</strong>. ${c}`;
-        if(answers[idx] === i) div.classList.add('selected');
-        div.addEventListener('click', ()=>{
-          answers[idx] = i; document.querySelectorAll('.answer').forEach(n=>n.classList.remove('selected')); div.classList.add('selected'); updateProgress();
-        });
-        answersEl.appendChild(div);
+    function showQuestion() {
+      const q = questions[current];
+      const container = document.getElementById('questionContainer');
+      container.innerHTML = `<div class='question'><b>${current + 1}. ${q.question}</b></div>` +
+        q.options.map((opt, i) => `<div class='option' onclick='selectOption(${i}, this)'>${opt}</div>`).join('');
+    }
+
+    function selectOption(i, element) {
+      const q = questions[current];
+      userAnswers[current] = i;
+      document.querySelectorAll('.option').forEach(o => o.style.pointerEvents = 'none');
+      if (i === q.correct) {
+        element.classList.add('correct');
+        score++;
+      } else {
+        element.classList.add('wrong');
+        document.querySelectorAll('.option')[q.correct].classList.add('correct');
+      }
+      setTimeout(() => nextQuestion(), 1000);
+    }
+
+    function nextQuestion() {
+      current++;
+      if (current < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById('quiz').style.display = 'none';
+      const resultDiv = document.getElementById('result');
+      let percent = Math.round((score / questions.length) * 100);
+      let comment = percent < 50 ? 'Du musst noch viel üben!' : percent < 80 ? 'Gut gemacht! Du bist auf dem richtigen Weg!' : 'Ausgezeichnet! Dein Deutsch ist hervorragend!';
+      let table = `<h2>Ergebnis: ${score}/${questions.length} (${percent}%)</h2><p>${comment}</p>`;
+      table += `<table id='resultTable'><tr><th>#</th><th>Deine Antwort</th><th>Richtige Antwort</th><th>✔/✖</th></tr>`;
+      questions.forEach((q, idx) => {
+        const ua = userAnswers[idx];
+        const correct = q.correct;
+        const correctMark = ua === correct ? '✔' : '✖';
+        table += `<tr><td>${idx+1}</td><td>${q.options[ua]||'-'}</td><td>${q.options[correct]}</td><td>${correctMark}</td></tr>`;
       });
-      updateProgress();
+      table += `</table><button onclick='downloadScreenshot()'>📸 Screenshot machen</button>`;
+      table += `<button onclick='startNewTest()'>🔁 Neuer Test</button>`;
+      resultDiv.innerHTML = table;
+      resultDiv.style.display = 'block';
     }
 
-    function updateProgress(){
-      const answered = answers.filter(x=>x!=null).length;
-      progressEl.textContent = `${answered} ta javob / Antworten: ${answered}`;
+    function startNewTest() {
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('start').style.display = 'block';
     }
 
-    prevBtn.addEventListener('click', ()=>{ if(idx>0){ idx--; renderQuestion(); }});
-    nextBtn.addEventListener('click', ()=>{ if(idx<questions.length-1){ idx++; renderQuestion(); } else showResults(); });
-    finishBtn.addEventListener('click', showResults);
-
-    function showResults(){
-      // compute score
-      let correct = 0; let rows = '';
-      questions.forEach((q,i)=>{
-        const ua = answers[i]; const ok = ua != null && ua === q.correctIndex; if(ok) correct++;
-        const userTxt = ua==null?'-':q.choices[ua]; const correctTxt = q.choices[q.correctIndex];
-        rows += `<tr><td>${i+1}</td><td style='text-align:left;padding-left:8px'>${escapeHtml(q.text)}</td><td>${userTxt}</td><td>${correctTxt}</td><td>${ok? '✅' : '❌'}</td></tr>`;
-      });
-      const percent = Math.round(correct/questions.length*100);
-      const u = UI[lang];
-      const comment = percent < 50 ? u.commentPoor : percent < 80 ? u.commentOk : u.commentGreat;
-      resultSummary.innerHTML = `<div style='font-weight:700;margin-bottom:6px'>${u.resultTitle}: ${correct}/${questions.length} (${percent}%)</div><div style='margin-bottom:8px'>${comment}</div>`;
-      resultTableWrap.innerHTML = `<div style='overflow:auto;max-height:320px'><table><thead><tr><th>#</th><th>Frage (DE)</th><th>${lang==='uz'?'Sizning javobingiz':'Deine Antwort'}</th><th>${lang==='uz'?'Toʻgʻri javob':'Richtige Antwort'}</th><th>OK</th></tr></thead><tbody>${rows}</tbody></table></div><button class='btn-screenshot' id='screenshotBtn'>${u.takeScreenshot} / ${UI[lang==='uz'?'de':'uz'].takeScreenshot}</button>`;
-
-      // attach screenshot handler
-      $('#screenshotBtn').addEventListener('click', ()=>{
-        const btn = $('#screenshotBtn'); btn.style.display = 'none';
-        // scroll resultPanel into view for screenshot on mobile
-        resultPanel.scrollIntoView({behavior:'smooth', block:'center'});
-        // wait a tick to allow layout updates
-        setTimeout(()=>{
-          html2canvas(resultPanel, {scale:2, useCORS:true}).then(canvas=>{
-            const link = document.createElement('a'); link.download = `deutsch_test_${new Date().toISOString().slice(0,19).replace(/[T:]/g,'-')}.png`;
-            link.href = canvas.toDataURL('image/png'); link.click(); btn.style.display = 'inline-block';
-          }).catch(err=>{alert('Screenshot xato — iltimos brauzerda ruxsatlarni tekshiring. / Fehler beim Screenshot.'); btn.style.display = 'inline-block';});
-        }, 250);
+    function downloadScreenshot() {
+      html2canvas(document.getElementById('result')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'deutsch_test_result.png';
+        link.href = canvas.toDataURL();
+        link.click();
       });
     }
-
-    // small helper to escape HTML in table
-    function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
   </script>
 </body>
 </html>
