@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch KI-Test — Немис тили тести</title>
+  <style>
+    :root{--bg1:#0f1724;--bg2:#0ea5e9;--card:#0b1220;--accent:#7c3aed;--accent2:#06b6d4;--white:#f8fafc}
+    *{box-sizing:border-box;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
+    body{margin:0;min-height:100vh;background:linear-gradient(135deg,var(--bg2),#0369a1);color:var(--white);display:flex;align-items:center;justify-content:center;padding:28px}
+    .wrap{width:960px;max-width:100%;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02));border-radius:16px;padding:20px;box-shadow:0 8px 40px rgba(2,6,23,0.6)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    h1{font-size:20px;margin:0;background:linear-gradient(90deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .controls{display:flex;gap:8px;align-items:center}
+    select,button{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:var(--white);padding:8px 12px;border-radius:8px}
+    button.primary{background:linear-gradient(90deg,var(--accent2),var(--accent));border:none;color:#fff;font-weight:600}
+    .card{background:rgba(255,255,255,0.03);padding:18px;border-radius:10px}
+    .question-number{font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:6px}
+    .question-text{font-size:18px;margin:10px 0 16px;font-weight:600}
+    .answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .answer{padding:12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+    .answer:hover{transform:translateY(-3px)}
+    .answer.selected{box-shadow:0 6px 18px rgba(124,58,237,0.18);border-color:rgba(124,58,237,0.9)}
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+    .small{font-size:13px;color:rgba(255,255,255,0.8)}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border:1px solid rgba(255,255,255,0.06);padding:8px;text-align:center}
+    th{background:rgba(255,255,255,0.02)}
+    .screenshot-btn{margin-top:12px;background:linear-gradient(90deg,#f97316,#fb7185);border:none;padding:10px 14px;border-radius:8px;color:#fff}
+    @media(max-width:700px){.answers{grid-template-columns:1fr}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Deutsch KI-Test — Немис тили тести</h1>
+      <div class="controls">
+        <label>
+          <select id="langSelect" aria-label="language switch">
+            <option value="uz">🇺🇿 Oʻzbekcha</option>
+            <option value="de">🇩🇪 Deutsch</option>
+          </select>
+        </label>
+        <label class="small" id="levelLabel">Daraja / Niveau:
+          <select id="level">
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+            <option value="C2">C2</option>
+          </select>
+        </label>
+        <button id="startBtn" class="primary">Testni boshlash / Test starten</button>
+      </div>
+    </header>
+
+    <main class="card">
+      <div id="intro">
+        <p id="introText">Boshlash uchun "Testni boshlash" tugmasini bosing. Savollar doimo <strong>nemis tilida</strong> bo‘ladi. / Klicke "Test starten", um zu beginnen. Die Fragen sind immer <strong>auf Deutsch</strong>.</p>
+      </div>
+
+      <section id="quiz" style="display:none">
+        <div class="question-number" id="qnum"></div>
+        <div class="question-text" id="qtext"></div>
+        <div class="answers" id="answers"></div>
+        <div class="footer">
+          <div class="small" id="progress"></div>
+          <div>
+            <button id="nextBtn">Keyingi / Nächste</button>
+            <button id="finishBtn">Tugatish / Beenden</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="result" style="display:none"></section>
+    </main>
+  </div>
+
+  <script>
+    // UI strings for Uzbek (uz) and German (de)
+    const UI = {
+      uz: {
+        start: 'Testni boshlash', next: 'Keyingi', finish: 'Tugatish', takeScreenshot: '📸 Skachat qilish',
+        intro: 'Boshlash uchun "Testni boshlash" tugmasini bosing. Savollar doimo <strong>nemis tilida</strong> bo‘ladi.',
+        resultTitle: 'Natija', scoreText: (s,n)=>`${s}/${n}`,
+        commentPoor: 'Sizga ko‘proq mashq kerak!', commentOk: 'Yaxshi! Yo‘lda ketayapsiz!', commentGreat: 'Ajoyib! Sizning nemis tilingiz zo‘r!'
+      },
+      de: {
+        start: 'Test starten', next: 'Nächste', finish: 'Beenden', takeScreenshot: '📸 Screenshot speichern',
+        intro: 'Klicke "Test starten", um zu beginnen. Die Fragen sind immer <strong>auf Deutsch</strong>.',
+        resultTitle: 'Ergebnis', scoreText: (s,n)=>`${s}/${n}`,
+        commentPoor: 'Du musst noch viel üben!', commentOk: 'Gut gemacht! Du bist auf dem richtigen Weg!', commentGreat: 'Ausgezeichnet! Dein Deutsch ist hervorragend!'
+      }
+    };
+
+    // Word pools (German) used to generate questions — questions remain in German
+    const pools = {
+      A1: {words:['Haus','Hund','Katze','Buch','Auto','Kind','Tisch','Stuhl','Apfel','Wasser'], verbs:['sein','haben','gehen','kommen','machen','essen']},
+      A2: {words:['Zeit','Arbeit','Freund','Familie','Zimmer','Straße','Name','Adresse','Garten','Einkauf'], verbs:['brauchen','kaufen','suchen','finden','lernen','arbeiten']},
+      B1: {words:['Erfahrung','Möglichkeit','Entwicklung','Gesellschaft','Politik','Technik'], verbs:['entwickeln','erklären','verbessern']},
+      B2: {words:['Herausforderung','Verantwortung','Zufriedenheit','Bedeutung','Analyse','Forschung'], verbs:['bewältigen','erfordern','beeinflussen']},
+      C1: {words:['Konsequenz','Diversifikation','Hypothese','Paradigma','Synthese','Prognose'], verbs:['implizieren','evaluieren','konsolidieren']},
+      C2: {words:['Präambel','Epistemologie','Hermeneutik','Ambiguität','Teleologie','Kontingenz'], verbs:['dekonstruktivieren','reziprozieren']}
+    };
+
+    // helper funcs
+    function randInt(n){return Math.floor(Math.random()*n)}
+    function sample(arr){return arr[randInt(arr.length)]}
+    function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+
+    // Generate a single question (always German)
+    function createQuestion(level){
+      const lvl = pools[level] || pools.A1;
+      const t = Math.random();
+
+      // A1: article or translate noun
+      if(level==='A1' && t<0.45){
+        const noun = sample(lvl.words);
+        const correct = sample(['der','die','das']);
+        const wrongs = shuffle(['der','die','das'].filter(a=>a!==correct)).slice(0,2);
+        const choices = shuffle([correct,...wrongs,sample(['ein','eine'])]);
+        return {text:`Welcher Artikel passt zu "${noun}"?`, choices, correctIndex: choices.indexOf(correct)};
+      }
+
+      if((level==='A1'||level==='A2') && t<0.9){
+        const word = sample(lvl.words);
+        // small translations map for common A1 words; for unknown use placeholder
+        const translations = {'Haus':'uy','Hund':'it','Katze':'mushuk','Buch':'kitob','Auto':'mashina','Kind':'bola','Tisch':'stol','Stuhl':'stul','Apfel':'olma','Wasser':'suv','Zeit':'vaqt','Arbeit':'ish','Freund':'do‘st','Familie':'oila','Zimmer':'xona'};
+        const correct = translations[word] || 'taʼrif';
+        const pool = Object.values(translations);
+        const wrongs = [];
+        while(wrongs.length<3){const w=sample(pool); if(!wrongs.includes(w) && w!==correct) wrongs.push(w);} 
+        const choices = shuffle([correct,...wrongs]);
+        return {text: `Übersetze ins Uzbekisch: "${word}"`, choices, correctIndex: choices.indexOf(correct)};
+      }
+
+      // B1+: verb conjugation or synonym
+      if((level==='B1' || level==='B2') && t<0.6){
+        const subjects=['ich','du','er','sie','wir','ihr'];
+        const v = sample(Object.values(pools).flatMap(x=>x.verbs));
+        const subj = sample(subjects);
+        const conj = conjugatePresent(v, subj);
+        const wrongs=[]; while(wrongs.length<3){const w=conjugatePresent(sample(Object.values(pools).flatMap(x=>x.verbs)), subj); if(!wrongs.includes(w) && w!==conj) wrongs.push(w);} 
+        const choices = shuffle([conj,...wrongs]);
+        return {text: `Wähle die richtige Form: "${subj} ${v}" (Präsens)`, choices, correctIndex: choices.indexOf(conj)};
+      }
+
+      // higher levels: closest meaning (German word) — choices are German
+      const word = sample(Object.values(pools).flatMap(x=>x.words));
+      const pool = Object.values(pools).flatMap(x=>x.words);
+      const wrongs = [];
+      while(wrongs.length<3){const w=sample(pool); if(!wrongs.includes(w) && w!==word) wrongs.push(w);} 
+      const choices = shuffle([word,...wrongs]);
+      return {text:`Wähle das Wort, das der Bedeutung von "${word}" am nächsten kommt.`, choices, correctIndex: choices.indexOf(word)};
+    }
+
+    function conjugatePresent(inf, subj){let stem = inf.replace(/(en|n)$/,''); switch(subj){case'ich': return stem+'e'; case'du': return stem+'st'; case'er': case'sie': return stem+'t'; case'wir': return inf; case'ihr': return stem+'t'; default: return inf; }}
+
+    // generate 20 unique questions
+    function generateTest(level){
+      const used = new Set();
+      const qs = [];
+      while(qs.length < 20){
+        const q = createQuestion(level);
+        if(!used.has(q.text)){
+          used.add(q.text);
+          qs.push(q);
+        }
+      }
+      return qs;
+    }
+
+    // state
+    let questions = [];
+    let current = 0;
+    let userAnswers = [];
+    let lang = 'uz'; // default interface language
+
+    // elements
+    const langSelect = document.getElementById('langSelect');
+    const startBtn = document.getElementById('startBtn');
+    const levelSelect = document.getElementById('level');
+    const introText = document.getElementById('introText');
+    const quiz = document.getElementById('quiz');
+    const qnum = document.getElementById('qnum');
+    const qtext = document.getElementById('qtext');
+    const answersDiv = document.getElementById('answers');
+    const progress = document.getElementById('progress');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    const resultSection = document.getElementById('result');
+
+    // language switch
+    langSelect.addEventListener('change', ()=>{
+      lang = langSelect.value;
+      applyUILanguage();
+    });
+
+    function applyUILanguage(){
+      const u = UI[lang];
+      startBtn.textContent = `${u.start} / ${UI[lang==='uz'?'de':'uz'].start}`;
+      nextBtn.textContent = `${u.next} / ${UI[lang==='uz'?'de':'uz'].next}`;
+      finishBtn.textContent = `${u.finish} / ${UI[lang==='uz'?'de':'uz'].finish}`;
+      introText.innerHTML = u.intro + ' / ' + UI[lang==='uz'?'de':'uz'].intro;
+      document.getElementById('levelLabel').childNodes[0].textContent = (lang==='uz'?'Daraja: ':'Niveau: ');
+    }
+
+    applyUILanguage();
+
+    // start test
+    startBtn.addEventListener('click', ()=>{
+      const level = levelSelect.value;
+      questions = generateTest(level);
+      current = 0; userAnswers = [];
+      document.getElementById('intro').style.display = 'none';
+      quiz.style.display = 'block';
+      resultSection.style.display = 'none';
+      renderQuestion();
+    });
+
+    function renderQuestion(){
+      const q = questions[current];
+      qnum.textContent = `${current+1} / ${questions.length}`;
+      qtext.textContent = q.text; answersDiv.innerHTML='';
+      q.choices.forEach((c,i)=>{
+        const d = document.createElement('div'); d.className='answer'; d.innerHTML = `<strong>${String.fromCharCode(65+i)}</strong>. ${c}`;
+        d.addEventListener('click', ()=>{
+          document.querySelectorAll('.answer').forEach(n=>n.classList.remove('selected'));
+          d.classList.add('selected');
+          userAnswers[current] = i;
+        });
+        answersDiv.appendChild(d);
+      });
+      progress.textContent = `${UI[lang].start} — ${current+1}/${questions.length}`;
+    }
+
+    nextBtn.addEventListener('click', ()=>{
+      if(userAnswers[current] == null){
+        // allow skip but move on
+      }
+      if(current < questions.length -1){ current++; renderQuestion(); }
+      else showResults();
+    });
+
+    finishBtn.addEventListener('click', showResults);
+
+    function showResults(){
+      quiz.style.display = 'none';
+      resultSection.style.display = 'block';
+      const u = UI[lang];
+      let correct = 0;
+      let rows = '';
+      questions.forEach((q, idx)=>{
+        const ua = userAnswers[idx];
+        const correctIdx = q.correctIndex;
+        const ok = ua != null && ua === correctIdx;
+        if(ok) correct++;
+        const userTxt = ua == null ? '-' : q.choices[ua];
+        rows += `<tr><td>${idx+1}</td><td>${userTxt}</td><td>${q.choices[correctIdx]}</td><td>${ok? '✅' : '❌'}</td></tr>`;
+      });
+      const percent = Math.round(correct/questions.length*100);
+      let comment = percent < 50 ? u.commentPoor : percent < 80 ? u.commentOk : u.commentGreat;
+      // bilingual title
+      resultSection.innerHTML = `
+        <h2>${u.resultTitle} / ${UI[lang==='uz'?'de':'uz'].resultTitle}: ${u.scoreText(correct, questions.length)} (${percent}%)</h2>
+        <p>${comment} / ${UI[lang==='uz'?'de':'uz'][percent < 50 ? 'commentPoor' : percent < 80 ? 'commentOk' : 'commentGreat']}</p>
+        <table>
+          <thead><tr><th>#</th><th>${lang==='uz'?'Sizning javobingiz':'Deine Antwort'}</th><th>${lang==='uz'?'Toʻgʻri javob':'Richtige Antwort'}</th><th>OK</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <button class='screenshot-btn' id='screenshotBtn'>${u.takeScreenshot} / ${UI[lang==='uz'?'de':'uz'].takeScreenshot}</button>
+      `;
+
+      document.getElementById('screenshotBtn').addEventListener('click', ()=>{
+        // hide interactive elements for clean screenshot
+        const btn = document.getElementById('screenshotBtn'); btn.style.display='none';
+        html2canvas(resultSection, {scale:2}).then(canvas=>{
+          const link = document.createElement('a'); link.download = `deutsch_test_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.png`;
+          link.href = canvas.toDataURL('image/png'); link.click(); btn.style.display='inline-block';
+        }).catch(err=>{alert('Screenshot xato — iltimos brauzerda ruxsatlarni tekshiring. / Fehler beim Screenshot.'); btn.style.display='inline-block';});
+      });
+    }
+
+  </script>
+</body>
+</html>
